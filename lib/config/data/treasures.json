@@ -1,0 +1,47 @@
+{
+    "punishments": [
+        {
+            "id": 1,
+            "name": "Call me master",
+            "category": "neutral",
+            "details": ""
+        },
+        {
+            "id": 2,
+            "name": "Plank for 20 seconds",
+            "category": "neutral",
+            "details": ""
+        }
+    ],
+    "rewards": [
+        {
+            "id": 1,
+            "name": "< RM30 treat",
+            "category": "neutral",
+            "details": ""
+        },
+        {
+            "id": 2,
+            "name": "Hai Di Lao meal < RM200",
+            "category": "neutral",
+            "details": ""
+        }
+    ],
+    "treasures": [
+        {
+            "id": 1,
+            "name": "Bulba",
+            "imageUrl": "file://bullbasaur.png",
+            "stats": {
+                "odds": 0.123
+            },
+            "punishments": [
+                1,
+                2
+            ],
+            "rewards": [
+                1
+            ]
+        }
+    ]
+}
