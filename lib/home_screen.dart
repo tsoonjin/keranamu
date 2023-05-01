@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:f_logs/f_logs.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,22 +10,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List treasures = [];
+  late Future<List> cardCollection;
 
   @override
   void initState() {
     super.initState();
-    if (mounted) {
-      fetchContent();
-    }
+    cardCollection = fetchContent();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: TextField(
-            decoration:
-                InputDecoration(hintText: "e.g. Aaron, Kadabra, Gengar")));
     return Scaffold(
         backgroundColor: Colors.white60,
         body: Center(
@@ -35,24 +28,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: DecoratedBox(
                     decoration: BoxDecoration(
                         border: Border.all(color: Colors.red, width: 2)),
-                    child: Column(
-                        children: const <Widget>[SizedBox(height: 12.0)])))));
+                    child: Column(children: const <Widget>[
+                      TextField(
+                        decoration: InputDecoration(
+                            hintText: 'Search... e.g. Gengar, Makuhita'),
+                      ),
+                      SizedBox(height: 12.0)
+                    ])))));
   }
 
-  void fetchContent() {
+  Future<List> fetchContent() async {
     var url = Uri.https('raw.githubusercontent.com',
         '/tsoonjin/keranamu/main/lib/config/data/treasures.json');
-    http.get(url).then((value) {
-      if (value.statusCode == 200) {
-        var data = jsonDecode(value.body);
-        treasures = data['treasures'];
-
-        setState(() {});
-
-        FLog.info(text: treasures.toString());
-      }
-    }).catchError((e) {
-      FLog.error(text: "Failed to fetch data");
-    });
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)['treasures'];
+    } else {
+      throw Exception("Failed to fetch card collections");
+    }
   }
 }
