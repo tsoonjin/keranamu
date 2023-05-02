@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keranamu/repository/card_repository.dart';
 
 import 'widgets/image_card.dart';
 
@@ -11,6 +12,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String _searchText = "";
+  final _tamagoRepository = TamagoRepository();
+  late Future<TamagoPageResponse> tamagos;
   final TextEditingController _searchController = TextEditingController();
   final List<String> _imageNames = [
     "image1",
@@ -24,6 +27,12 @@ class _MyHomePageState extends State<MyHomePage> {
     "image9",
     "image10"
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    tamagos = _tamagoRepository.getTamagoPage();
+  }
 
   @override
   Widget build(BuildContext context) {
