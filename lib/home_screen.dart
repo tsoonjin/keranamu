@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:keranamu/repository/card_repository.dart';
+import 'package:f_logs/f_logs.dart';
 
+import 'entity/tamago_listing_cubit.dart';
+import 'entity/tamago_listing_state.dart';
 import 'widgets/image_card.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -12,26 +16,15 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String _searchText = "";
-  final _tamagoRepository = TamagoRepository();
-  late Future<TamagoPageResponse> tamagos;
   final TextEditingController _searchController = TextEditingController();
-  final List<String> _imageNames = [
-    "image1",
-    "image2",
-    "image3",
-    "image4",
-    "image5",
-    "image6",
-    "image7",
-    "image8",
-    "image9",
-    "image10"
-  ];
 
   @override
   void initState() {
     super.initState();
-    tamagos = _tamagoRepository.getTamagoPage();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      final cubit = context.read<TamagoListingCubit>();
+      cubit.fetchTamagoListing();
+    });
   }
 
   @override
@@ -53,26 +46,38 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),
           ),
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(10),
-              itemCount: _imageNames.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3, crossAxisSpacing: 10, mainAxisSpacing: 10),
-              itemBuilder: (BuildContext context, int index) {
-                if (_searchText.isEmpty ||
-                    _imageNames[index]
-                        .toLowerCase()
-                        .contains(_searchText.toLowerCase())) {
+          Expanded(child: BlocBuilder<TamagoListingCubit, TamagoListingState>(
+              builder: (context, state) {
+            if (state is InitTamagoListingState ||
+                state is LoadingTamagoListingState) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (state is ResponseTamagoListingState) {
+              final List<Tamago> tamagos = state.tamagos;
+              final List<Tamago> filteredTamagos = _searchText.isEmpty
+                  ? tamagos
+                  : tamagos
+                      .where((i) => i.name
+                          .toLowerCase()
+                          .contains(_searchText.toLowerCase()))
+                      .toList();
+              return GridView.builder(
+                padding: const EdgeInsets.all(10),
+                itemCount: filteredTamagos.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10),
+                itemBuilder: (BuildContext context, int index) {
                   return ImageCard(
-                    imageName: _imageNames[index],
-                  );
-                } else {
-                  return Container();
-                }
-              },
-            ),
-          ),
+                      imageName: filteredTamagos[index].name,
+                      id: filteredTamagos[index].id);
+                },
+              );
+            }
+            return Center(child: Text(state.toString()));
+          })),
         ],
       ),
     );

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 class ImageCard extends StatelessWidget {
   final String imageName;
+  final int id;
 
-  const ImageCard({Key? key, required this.imageName}) : super(key: key);
+  const ImageCard({Key? key, required this.imageName, required this.id})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +32,8 @@ class ImageCard extends StatelessWidget {
                     radius: MediaQuery.of(context).size.width * 0.25,
                     backgroundColor: Colors.transparent,
                     child: ClipOval(
-                        child: Image.asset(
-                      'images/$imageName.png',
+                        child: Image.network(
+                      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$id.png',
                       height: 300,
                       width: 200,
                       fit: BoxFit.fill,
