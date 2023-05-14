@@ -27,41 +27,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void showCustomDialog(BuildContext context) => showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 12),
-                const Text(
-                  'This is a Custom Dialog',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'You get more customisation freedom in this type of dialogs',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20),
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  child: const Text('Close'),
-                  onPressed: () => Navigator.of(context).pop(),
-                )
-              ],
-            ),
-          ),
-        ),
-      );
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

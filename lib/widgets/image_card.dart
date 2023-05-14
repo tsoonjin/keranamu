@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keranamu/widgets/card_dialog.dart';
 
 class ImageCard extends StatelessWidget {
   final String imageName;
@@ -10,36 +11,7 @@ class ImageCard extends StatelessWidget {
   void showCustomDialog(BuildContext context) => showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 12),
-                const Text(
-                  'This is a Custom Dialog',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'You get more customisation freedom in this type of dialogs',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20),
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  child: const Text('Close'),
-                  onPressed: () => Navigator.of(context).pop(),
-                )
-              ],
-            ),
-          ),
-        ),
+        builder: (context) => CardDialog(name: imageName, id: id),
       );
 
   @override
