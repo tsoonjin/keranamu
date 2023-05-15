@@ -1,7 +1,7 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 enum TamagoMode { initial, battle, claim }
 
@@ -20,6 +20,34 @@ class _CardDialogState extends State<CardDialog> {
   Color buttonForegroundColor = Colors.blue;
   Color buttonBackgroundColor = Colors.white;
   TamagoMode mode = TamagoMode.initial;
+  bool isReady = false;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
+      if (!isReady) {
+        bool ready = await _getTamagoReadiness(widget.id);
+        print(ready);
+        setState(() {
+          isReady = ready;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _timer?.cancel();
+  }
+
+  Future<bool> _getTamagoReadiness(int id) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    int rng = 1 + Random().nextInt(9);
+    return rng > 5;
+  }
 
   _getCloseButton(context) {
     return Padding(
@@ -93,7 +121,7 @@ class _CardDialogState extends State<CardDialog> {
                               RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(18.0),
                                   side: const BorderSide(color: Colors.blue)))),
-                      child: const Text("Claim")),
+                      child: const Text("Reward")),
                   const SizedBox(width: 32),
                   ElevatedButton(
                       onPressed: () => setState(() {
@@ -109,21 +137,22 @@ class _CardDialogState extends State<CardDialog> {
                               RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(18.0),
                                   side: const BorderSide(color: Colors.blue)))),
-                      child: const Text("Battle")),
+                      child: const Text("Punishment")),
                 ]),
-                if (mode == TamagoMode.claim) ...[
-                  const SizedBox(height: 24),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: 'Code',
-                      border: OutlineInputBorder(),
+                const SizedBox(height: 24),
+                Center(
+                  child: ElevatedButton.icon(
+                    icon: isReady
+                        ? const Icon(Icons.handshake)
+                        : const CircularProgressIndicator(),
+                    label: Text(
+                      isReady ? 'Join' : 'Loading ...',
+                      style: const TextStyle(fontSize: 30),
                     ),
+                    onPressed: isReady ? () => print("Pressed") : null,
                   ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                      onPressed: () => print("Submitted"),
-                      child: const Text('Submit'))
-                ],
+                ),
+                const SizedBox(height: 24),
               ],
             )),
       ),
