@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:keranamu/tamago_battle_screen.dart';
 
 enum TamagoMode { initial, battle, claim }
 
@@ -149,7 +150,15 @@ class _CardDialogState extends State<CardDialog> {
                       isReady ? 'Join' : 'Loading ...',
                       style: const TextStyle(fontSize: 30),
                     ),
-                    onPressed: isReady ? () => print("Pressed") : null,
+                    onPressed: isReady
+                        ? () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const TamagoBattlePage()));
+                          }
+                        : null,
                   ),
                 ),
                 const SizedBox(height: 24),
