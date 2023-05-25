@@ -53,14 +53,39 @@ class _TamagoBattlePageState extends State<TamagoBattlePage> {
   List<String> draft = ["", "", "", "", ""];
 
   // ignore: prefer_function_declarations_over_variables
+  Function() onTapDraftCard(String cardKey) {
+    return () {
+      var currHandCards = Map.of(handCards);
+      var currDraftCards = List.of(draft);
+      int currIndex = currDraftCards.indexOf(cardKey);
+
+      if (cardKey != "") {
+        currHandCards[cardKey] = currHandCards[cardKey]! + 1;
+        currDraftCards[currIndex] = "";
+      }
+
+      setState(() {
+        handCards = Map.of(currHandCards);
+        draft = List.of(currDraftCards);
+      });
+    };
+  }
+
+  // ignore: prefer_function_declarations_over_variables
   Function() onTapHandCard(String cardKey) {
     return () {
       var currHandCards = Map.of(handCards);
-      if (currHandCards.containsKey(cardKey)) {
+      var currDraftCards = List.of(draft);
+      int firstAvailableSlot = currDraftCards.indexOf("");
+
+      if (currHandCards.containsKey(cardKey) && firstAvailableSlot >= 0) {
         currHandCards[cardKey] = max(0, currHandCards[cardKey]! - 1);
+        currDraftCards[firstAvailableSlot] = cardKey;
       }
+
       setState(() {
         handCards = Map.of(currHandCards);
+        draft = List.of(currDraftCards);
       });
     };
   }
@@ -96,7 +121,9 @@ class _TamagoBattlePageState extends State<TamagoBattlePage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: draft.map((String e) {
-                          return TamagoCard(icon: defaultImage);
+                          return TamagoCard(
+                              icon: imageMap[e] ?? defaultImage,
+                              onTap: onTapDraftCard(e));
                         }).toList(),
                       )
                     ],
