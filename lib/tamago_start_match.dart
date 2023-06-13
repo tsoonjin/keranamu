@@ -15,7 +15,13 @@ class TamagoStartMatchPage extends StatefulWidget {
   State<TamagoStartMatchPage> createState() => _TamagoStartMatchPageState();
 }
 
-class _TamagoStartMatchPageState extends State<TamagoStartMatchPage> {
+class _TamagoStartMatchPageState extends State<TamagoStartMatchPage>
+    with SingleTickerProviderStateMixin {
+  int animateHandIdx = 1;
+  final double maxOffset = 400;
+  late AnimationController _controller;
+  late Animation<double> animation;
+
   Image defaultImage = Image.network(
       'https://cdn-icons-png.flaticon.com/512/3524/3524344.png',
       height: 200,
@@ -57,6 +63,18 @@ class _TamagoStartMatchPageState extends State<TamagoStartMatchPage> {
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1000));
+    animation = Tween(begin: 0.0, end: maxOffset).animate(_controller);
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed && animateHandIdx < 5) {
+        Future.delayed(const Duration(milliseconds: 500), () {
+          _controller.forward(from: 0.0);
+          animateHandIdx++;
+        });
+      }
+    });
+    _controller.forward();
   }
 
   // ignore: prefer_function_declarations_over_variables
@@ -97,6 +115,18 @@ class _TamagoStartMatchPageState extends State<TamagoStartMatchPage> {
     };
   }
 
+  double calculateOffset(
+      int idx, int animateHandIdx, double animationVal, double maxOffset) {
+    double offset = maxOffset * idx;
+    if (idx < animateHandIdx) {
+      return offset;
+    } else if (idx == animateHandIdx) {
+      return animationVal * idx;
+    } else {
+      return 0;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,12 +150,33 @@ class _TamagoStartMatchPageState extends State<TamagoStartMatchPage> {
                       const SizedBox(
                         height: 100,
                       ),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: widget.oppHand.map((String e) {
-                            return TamagoCard(
-                                icon: imageMap[e] ?? defaultImage);
-                          }).toList())
+                      Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 48),
+                          child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: AnimatedBuilder(
+                                  animation: _controller,
+                                  builder: (context, child) {
+                                    return Stack(
+                                        children: widget.oppHand
+                                            .asMap()
+                                            .entries
+                                            .map((entry) {
+                                      int idx = entry.key;
+                                      String e = entry.value;
+                                      return Transform.translate(
+                                          offset: Offset(
+                                              calculateOffset(
+                                                  idx,
+                                                  animateHandIdx,
+                                                  animation.value,
+                                                  maxOffset),
+                                              0),
+                                          child: TamagoCard(
+                                              icon:
+                                                  imageMap[e] ?? defaultImage));
+                                    }).toList());
+                                  })))
                     ],
                   ))),
           Container(
@@ -144,12 +195,33 @@ class _TamagoStartMatchPageState extends State<TamagoStartMatchPage> {
                       const SizedBox(
                         height: 100,
                       ),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: widget.myHand.map((String e) {
-                            return TamagoCard(
-                                icon: imageMap[e] ?? defaultImage);
-                          }).toList())
+                      Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 48),
+                          child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: AnimatedBuilder(
+                                  animation: _controller,
+                                  builder: (context, child) {
+                                    return Stack(
+                                        children: widget.myHand
+                                            .asMap()
+                                            .entries
+                                            .map((entry) {
+                                      int idx = entry.key;
+                                      String e = entry.value;
+                                      return Transform.translate(
+                                          offset: Offset(
+                                              calculateOffset(
+                                                  idx,
+                                                  animateHandIdx,
+                                                  animation.value,
+                                                  maxOffset),
+                                              0),
+                                          child: TamagoCard(
+                                              icon:
+                                                  imageMap[e] ?? defaultImage));
+                                    }).toList());
+                                  })))
                     ],
                   ))),
         ],

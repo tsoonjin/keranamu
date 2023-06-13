@@ -58,7 +58,7 @@ class _TamagoBattlePageState extends State<TamagoBattlePage> {
   }
 
   late Timer _timer;
-  int _countdownSeconds = 10;
+  int _countdownSeconds = 3;
 
   List<String> randomDraft(Map<String, int> handCards) {
     List<String> randomDraft = [];
