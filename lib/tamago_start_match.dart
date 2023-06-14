@@ -77,6 +77,12 @@ class _TamagoStartMatchPageState extends State<TamagoStartMatchPage>
     _controller.forward();
   }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   // ignore: prefer_function_declarations_over_variables
   Function() onTapDraftCard(String cardKey) {
     return () {

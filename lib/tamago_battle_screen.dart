@@ -192,6 +192,7 @@ class _TamagoBattlePageState extends State<TamagoBattlePage> {
                                                     .width *
                                                 0.025),
                                         child: TamagoCard(
+                                            isFront: true,
                                             icon: imageMap[draft[index]] ??
                                                 defaultImage,
                                             onTap:
@@ -229,6 +230,7 @@ class _TamagoBattlePageState extends State<TamagoBattlePage> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: handCards.entries.map((MapEntry e) {
                             return TamagoCard(
+                                isFront: true,
                                 number: e.value,
                                 icon: imageMap[e.key] ?? defaultImage,
                                 onTap: onTapHandCard(e.key));
