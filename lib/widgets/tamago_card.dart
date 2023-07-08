@@ -33,7 +33,7 @@ class _TamagoCardState extends State<TamagoCard> with TickerProviderStateMixin {
     setState(() {
       isFront = widget.isFront ?? false;
       controller = AnimationController(
-          vsync: this, duration: const Duration(milliseconds: 800));
+          vsync: this, duration: const Duration(milliseconds: 1500));
     });
   }
 
@@ -49,9 +49,10 @@ class _TamagoCardState extends State<TamagoCard> with TickerProviderStateMixin {
   }
 
   bool isFrontImage(double angle) {
-    const degree90 = pi / 2;
-    const degree270 = 3 / 2 * pi;
-    return angle <= degree90 || angle > degree270;
+    const degree90 = pi / 4;
+    bool isFront = angle <= degree90;
+    print("Is Front: $isFront, Angle: $angle");
+    return isFront;
   }
 
   @override
@@ -62,15 +63,13 @@ class _TamagoCardState extends State<TamagoCard> with TickerProviderStateMixin {
     return AnimatedBuilder(
         animation: controller,
         builder: (context, child) {
-          final angle = controller.value * -pi;
-          final transform = Matrix4.identity()
-            ..setEntry(3, 2, 0.001)
-            ..rotateX(angle);
+          final angle = controller.value * -(pi / 2);
+          final transform = Matrix4.identity()..rotateY(angle);
 
           return Transform(
               transform: transform,
               alignment: Alignment.center,
-              child: isFrontImage(angle.abs())
+              child: !isFrontImage(angle.abs())
                   ? GestureDetector(
                       onTap: widget.number != 0 && widget.onTap != null
                           ? widget.onTap
@@ -110,9 +109,10 @@ class _TamagoCardState extends State<TamagoCard> with TickerProviderStateMixin {
                           ],
                         ),
                       ))
-                  : Transform(
-                      transform: transform,
-                      alignment: Alignment.center,
+                  : GestureDetector(
+                      onTap: () async {
+                        await flipCard();
+                      },
                       child: Container(
                           height: widget.height ??
                               MediaQuery.of(context).size.height * 0.25,

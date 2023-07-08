@@ -4,6 +4,7 @@ import 'package:keranamu/entity/tamago_listing_cubit.dart';
 import 'package:keranamu/home_screen.dart';
 import 'package:keranamu/repository/card_repository.dart';
 import 'package:keranamu/tamago_battle_screen.dart';
+import 'package:keranamu/tamago_start_match.dart';
 
 void main() {
   runApp(const Keranamu());
@@ -23,7 +24,17 @@ class Keranamu extends StatelessWidget {
         ],
         child: MaterialApp(initialRoute: '/', routes: {
           '/': (context) => const MyHomePage(),
-          '/tamago': (context) => const TamagoBattlePage()
+          '/tamago': (context) => const TamagoBattlePage(),
+          '/match': (context) => TamagoStartMatchPage(
+                myHand: const [
+                  "scissors",
+                  "scissors",
+                  "rock",
+                  "dragon",
+                  "rabbit"
+                ],
+                oppHand: const ["rock", "rock", "rabbit", "dragon", "scissors"],
+              )
         }));
   }
 }
