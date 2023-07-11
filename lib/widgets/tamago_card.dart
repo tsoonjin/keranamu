@@ -6,7 +6,9 @@ class TamagoCard extends StatefulWidget {
   final double? height;
   final double? width;
   final Image icon;
-  final bool? isFront;
+  final double rotateAngle;
+  final bool shouldClose;
+  final AnimationController? cardController;
   final Function()? onTap;
 
   const TamagoCard(
@@ -14,7 +16,9 @@ class TamagoCard extends StatefulWidget {
       this.number,
       required this.icon,
       this.onTap,
-      this.isFront,
+      this.cardController,
+      this.rotateAngle = 0.0,
+      this.shouldClose = false,
       this.height,
       this.width})
       : super(key: key);
@@ -23,36 +27,17 @@ class TamagoCard extends StatefulWidget {
   State<TamagoCard> createState() => _TamagoCardState();
 }
 
-class _TamagoCardState extends State<TamagoCard> with TickerProviderStateMixin {
-  late AnimationController controller;
-  late bool isFront;
-
+class _TamagoCardState extends State<TamagoCard>
+    with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      isFront = widget.isFront ?? false;
-      controller = AnimationController(
-          vsync: this, duration: const Duration(milliseconds: 1500));
-    });
   }
 
-  Future flipCard() async {
-    isFront = !isFront;
-    await controller.forward();
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  bool isFrontImage(double angle) {
-    const degree90 = pi / 4;
-    bool isFront = angle <= degree90;
-    print("Is Front: $isFront, Angle: $angle");
-    return isFront;
+  bool isFrontImage(double angle, bool shouldClose) {
+    const degree90 = pi / 2;
+    bool isFront = angle > degree90;
+    return isFront || !shouldClose;
   }
 
   @override
@@ -61,15 +46,17 @@ class _TamagoCardState extends State<TamagoCard> with TickerProviderStateMixin {
     Color textColor = widget.number == 0 ? Colors.white : Colors.black;
 
     return AnimatedBuilder(
-        animation: controller,
+        animation: widget.cardController ??
+            AnimationController(
+                vsync: this, duration: const Duration(milliseconds: 1500)),
         builder: (context, child) {
-          final angle = controller.value * -(pi / 2);
+          final angle = widget.rotateAngle * -pi;
           final transform = Matrix4.identity()..rotateY(angle);
 
           return Transform(
               transform: transform,
               alignment: Alignment.center,
-              child: !isFrontImage(angle.abs())
+              child: isFrontImage(angle.abs(), widget.shouldClose)
                   ? GestureDetector(
                       onTap: widget.number != 0 && widget.onTap != null
                           ? widget.onTap
@@ -110,9 +97,6 @@ class _TamagoCardState extends State<TamagoCard> with TickerProviderStateMixin {
                         ),
                       ))
                   : GestureDetector(
-                      onTap: () async {
-                        await flipCard();
-                      },
                       child: Container(
                           height: widget.height ??
                               MediaQuery.of(context).size.height * 0.25,

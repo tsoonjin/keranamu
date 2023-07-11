@@ -16,11 +16,14 @@ class TamagoStartMatchPage extends StatefulWidget {
 }
 
 class _TamagoStartMatchPageState extends State<TamagoStartMatchPage>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   int animateHandIdx = 1;
   final double maxOffset = 400;
   late AnimationController _controller;
+  late AnimationController _cardFlipController;
   late Animation<double> animation;
+  late List<Animation> cardAnimations;
+  late List<double> rotateAngles;
 
   Image defaultImage = Image.network(
       'https://cdn-icons-png.flaticon.com/512/3524/3524344.png',
@@ -63,15 +66,52 @@ class _TamagoStartMatchPageState extends State<TamagoStartMatchPage>
   @override
   void initState() {
     super.initState();
+    rotateAngles =
+        List<double>.generate(widget.myHand.length, (int index) => 0.0);
     _controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 1000));
+    _cardFlipController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 10000));
+    cardAnimations = [
+      for (var i = 0; i < widget.myHand.length; i += 1)
+        Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+            parent: _cardFlipController,
+            curve: Interval(i * 1 / (widget.myHand.length + 1),
+                (i + 1) * 1 / (widget.myHand.length + 1),
+                curve: Curves.linear)))
+    ];
+    print(cardAnimations);
     animation = Tween(begin: 0.0, end: maxOffset).animate(_controller);
+    _cardFlipController.addListener(() {
+      // print(cardAnimations.map((i) => i.value));
+      rotateAngles = [
+        for (var i = 0; i < widget.myHand.length; i += 1)
+          cardAnimations[i].value
+      ];
+      setState(() {
+        rotateAngles = rotateAngles;
+      });
+    });
+    _cardFlipController.addStatusListener((status) {
+      if (status != AnimationStatus.completed) {
+        print("Flippening: ${DateTime.now().toString()}");
+      }
+      if (status == AnimationStatus.completed) {
+        print("Done flipping: ${DateTime.now().toString()}");
+      }
+    });
     _controller.addStatusListener((status) {
-      if (status == AnimationStatus.completed && animateHandIdx < 5) {
+      if (status == AnimationStatus.completed &&
+          animateHandIdx < widget.myHand.length) {
         Future.delayed(const Duration(milliseconds: 500), () {
           _controller.forward(from: 0.0);
           animateHandIdx++;
         });
+      }
+      print("Animated Idx: $animateHandIdx");
+      if (animateHandIdx == widget.myHand.length) {
+        print("Flip the burger");
+        _cardFlipController.forward();
       }
     });
     _controller.forward();
@@ -179,6 +219,11 @@ class _TamagoStartMatchPageState extends State<TamagoStartMatchPage>
                                                   maxOffset),
                                               0),
                                           child: TamagoCard(
+                                              shouldClose:
+                                                  rotateAngles[idx] < 1,
+                                              cardController:
+                                                  _cardFlipController,
+                                              rotateAngle: rotateAngles[idx],
                                               icon:
                                                   imageMap[e] ?? defaultImage));
                                     }).toList());
@@ -224,6 +269,11 @@ class _TamagoStartMatchPageState extends State<TamagoStartMatchPage>
                                                   maxOffset),
                                               0),
                                           child: TamagoCard(
+                                              shouldClose:
+                                                  rotateAngles[idx] < 1,
+                                              cardController:
+                                                  _cardFlipController,
+                                              rotateAngle: rotateAngles[idx],
                                               icon:
                                                   imageMap[e] ?? defaultImage));
                                     }).toList());
