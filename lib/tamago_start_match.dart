@@ -18,12 +18,20 @@ class TamagoStartMatchPage extends StatefulWidget {
 class _TamagoStartMatchPageState extends State<TamagoStartMatchPage>
     with TickerProviderStateMixin {
   int animateHandIdx = 1;
+  int battleIdx = -1;
   final double maxOffset = 400;
   late AnimationController _controller;
   late AnimationController _cardFlipController;
   late Animation<double> animation;
-  late List<Animation> cardAnimations;
-  late List<double> rotateAngles;
+  late Animation<double> cardAnimation;
+  double rotateAngle = 0.0;
+  List<List<int>> cardBattleScores = [
+    [1, 0, 2, -1, 3],
+    [2, 1, 0, -1, 3],
+    [0, 2, 1, -1, 3],
+    [3, 3, 3, 1, -2],
+    [-2, -2, -2, 4, 1],
+  ];
 
   Image defaultImage = Image.network(
       'https://cdn-icons-png.flaticon.com/512/3524/3524344.png',
@@ -66,38 +74,27 @@ class _TamagoStartMatchPageState extends State<TamagoStartMatchPage>
   @override
   void initState() {
     super.initState();
-    rotateAngles =
-        List<double>.generate(widget.myHand.length, (int index) => 0.0);
     _controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 1000));
     _cardFlipController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 10000));
-    cardAnimations = [
-      for (var i = 0; i < widget.myHand.length; i += 1)
-        Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(
-            parent: _cardFlipController,
-            curve: Interval(i * 1 / (widget.myHand.length + 1),
-                (i + 1) * 1 / (widget.myHand.length + 1),
-                curve: Curves.linear)))
-    ];
-    print(cardAnimations);
+        vsync: this, duration: const Duration(milliseconds: 3000));
+    cardAnimation = Tween(begin: 0.0, end: 1.0).animate(_cardFlipController);
     animation = Tween(begin: 0.0, end: maxOffset).animate(_controller);
     _cardFlipController.addListener(() {
-      // print(cardAnimations.map((i) => i.value));
-      rotateAngles = [
-        for (var i = 0; i < widget.myHand.length; i += 1)
-          cardAnimations[i].value
-      ];
       setState(() {
-        rotateAngles = rotateAngles;
+        rotateAngle = cardAnimation.value;
       });
     });
     _cardFlipController.addStatusListener((status) {
       if (status != AnimationStatus.completed) {
         print("Flippening: ${DateTime.now().toString()}");
       }
-      if (status == AnimationStatus.completed) {
-        print("Done flipping: ${DateTime.now().toString()}");
+      if (status == AnimationStatus.completed &&
+          battleIdx < widget.myHand.length) {
+        Future.delayed(const Duration(milliseconds: 500), () {
+          _cardFlipController.forward(from: 0.0);
+          battleIdx++;
+        });
       }
     });
     _controller.addStatusListener((status) {
@@ -108,9 +105,9 @@ class _TamagoStartMatchPageState extends State<TamagoStartMatchPage>
           animateHandIdx++;
         });
       }
-      print("Animated Idx: $animateHandIdx");
       if (animateHandIdx == widget.myHand.length) {
         print("Flip the burger");
+        battleIdx = 0;
         _cardFlipController.forward();
       }
     });
@@ -219,11 +216,12 @@ class _TamagoStartMatchPageState extends State<TamagoStartMatchPage>
                                                   maxOffset),
                                               0),
                                           child: TamagoCard(
-                                              shouldClose:
-                                                  rotateAngles[idx] < 1,
+                                              shouldClose: idx >= battleIdx,
                                               cardController:
                                                   _cardFlipController,
-                                              rotateAngle: rotateAngles[idx],
+                                              rotateAngle: battleIdx == idx
+                                                  ? rotateAngle
+                                                  : 0,
                                               icon:
                                                   imageMap[e] ?? defaultImage));
                                     }).toList());
@@ -269,11 +267,12 @@ class _TamagoStartMatchPageState extends State<TamagoStartMatchPage>
                                                   maxOffset),
                                               0),
                                           child: TamagoCard(
-                                              shouldClose:
-                                                  rotateAngles[idx] < 1,
+                                              shouldClose: idx >= battleIdx,
                                               cardController:
                                                   _cardFlipController,
-                                              rotateAngle: rotateAngles[idx],
+                                              rotateAngle: battleIdx == idx
+                                                  ? rotateAngle
+                                                  : 0,
                                               icon:
                                                   imageMap[e] ?? defaultImage));
                                     }).toList());
